@@ -1,5 +1,4 @@
-﻿using MyLibrary.Collections;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
@@ -11,11 +10,13 @@ namespace MyLibrary.Collections.Grafo
         internal MyLinkedListNode _first;
         internal MyLinkedListNode _goal;
         internal List<MyLinkedListNode> _allNode;
+        internal List<string> _allNodeString;
 
         public MyLinkedList(MyLinkedListNode first, MyLinkedListNode last)
         {
             _first = first; _goal = last;
             _allNode = new List<MyLinkedListNode>();
+            _allNodeString = new List<string>();
             _allNode.Add(first);_allNode.Add(last);
         }
         
@@ -61,6 +62,104 @@ namespace MyLibrary.Collections.Grafo
         public void AddLast(MyLinkedListNode node)
         {
             node._next.Add(_goal);
+        }
+
+        public void AddString(string str)
+        {
+            str.Trim();            
+
+            char excluded1 = '(';
+            char excluded2 = ')';
+            char excluded3 = ',';
+
+            List<List<string>> all = new List<List<string>>();
+
+            for(int index=0; index<str.Count();index++)
+            {        
+                List<string> temp = new List<string>();
+
+                //if (str[index] == excluded1)                
+                string name = "";
+                for (; index <= str.Count(); index++)
+                {                    
+                    if (str[index] != excluded1 && str[index] != excluded2 && str[index] != excluded3) //exception
+                    {
+                        name += str[index];
+                    }
+
+                    if (str[index] == excluded3)
+                    {
+                        temp.Add(name);
+                        name = "";
+                    }                    
+
+                    if (str[index] == excluded2)
+                    {
+                        temp.Add(name);
+                        break;
+                    }
+                }
+
+                all.Add(temp);
+            }
+            
+            List<string> mustContain = new List<string>() { _first.name };
+            int countDone = 0;
+            //int indexMust = 0;
+            
+
+            //to see again the function of islock, i mean when i must lock the iterazione
+            for (int indexMust=0;countDone<all.Count;indexMust++)
+            {
+                List<List<string>> rightToAdd = new List<List<string>>();                
+
+                foreach (var list in all)
+                {
+                    if(list[0]==mustContain[indexMust])
+                    {
+                        rightToAdd.Add(list);                        
+                    }
+                }
+
+                if (rightToAdd.Count>0)
+                {
+                    foreach (var list in rightToAdd)
+                    {
+                        SetAllNodeString();
+
+                        //if(_allNodeString.Contains(list[0]))
+                        int indexFather = _allNodeString.FindIndex(x => x == list[0]);
+
+                        if (_allNodeString.Contains(list[1]))
+                        {
+                            int indexSon = _allNodeString.FindIndex(x => x == list[1]);
+                            AddAfter(_allNode[indexFather], _allNode[indexSon]);
+                            _allNode[indexFather].value.Add(list[1], Convert.ToInt32(list[2]));
+                            mustContain.Add(list[1]);
+                            countDone++;
+                        }
+                        else
+                        {
+                            var node = new MyLinkedListNode(list[1], new Dictionary<string, int>());
+                            //check if it is added to _allNode
+                            AddAfter(_allNode[indexFather], node);
+                            _allNode[indexFather].value.Add(list[1], Convert.ToInt32(list[2]));
+                            mustContain.Add(list[1]);
+                            countDone++;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SetAllNodeString()
+        {
+            _allNodeString = new List<string>();
+            foreach(var str in _allNode)
+            {
+                _allNodeString.Add(str.name);
+            }
+
         }
     }
 
