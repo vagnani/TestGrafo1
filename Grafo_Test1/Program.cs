@@ -11,9 +11,11 @@ namespace MyLibrary.Collections.Grafo
         static void Main()
         {
             MyLinkedList link = 
-                new MyLinkedList(new MyLinkedListNode ("n1",new Dictionary<string, int>() { }),
-                new MyLinkedListNode("nF",new Dictionary<string, int>() { ["n5"]=10,["n4"]=10}));
+                new MyLinkedList(new MyLinkedListNode ("n1",new Dictionary<string, int>()),
+                new MyLinkedListNode("nF",new Dictionary<string, int>());
 
+            Console.WriteLine("Inserisci nodi grafo con la seguente struttura:");
+            Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");
             string str = Console.ReadLine();
             link.AddString(str);
             //line to insert
