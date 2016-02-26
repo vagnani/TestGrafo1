@@ -10,9 +10,15 @@ namespace MyLibrary.Collections.Grafo
     {
         static void Main()
         {
-            MyLinkedList link = 
-                new MyLinkedList(new MyLinkedListNode ("n1",new Dictionary<string, int>()),
-                new MyLinkedListNode("nF",new Dictionary<string, int>());
+            Console.Write("Nodo radice: nome-");
+            string n1 = Console.ReadLine();
+
+            Console.WriteLine("Nodo finale/obbiettivo: nome-");
+            string nF = Console.ReadLine();
+
+            MyLinkedList link =
+                new MyLinkedList(new MyLinkedListNode(n1, new Dictionary<string, int>()),
+                new MyLinkedListNode(nF, new Dictionary<string, int>()));
 
             Console.WriteLine("Inserisci nodi grafo con la seguente struttura:");
             Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");
