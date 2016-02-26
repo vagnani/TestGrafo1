@@ -49,15 +49,7 @@ namespace MyLibrary.Collections.Grafo
             _allNode[found]._next.Add(newNode);
             if (!_allNode.Contains(newNode, newNode))
                 _allNode.Add(newNode);
-        }
-
-        //public void AddBefore(MyLinkedListNode node, MyLinkedListNode newNode)
-        //{
-        //    var found = _allNode.FindIndex(x => x.Equals(node));
-        //    _allNode[found]._prev.Add(newNode);
-        //    if (!_allNode.Contains(newNode, newNode))
-        //        _allNode.Add(newNode);
-        //}
+        }        
 
         public void Add(MyLinkedListNode node)
         {
@@ -85,10 +77,9 @@ namespace MyLibrary.Collections.Grafo
         {
             get
             {
-
-                //if(_index<_finalList.Count)
-                    return _finalList[_index];      
-                          
+                if(_index<_finalList.Count)
+                    return _finalList[_index];
+                throw new IndexOutOfRangeException();
             }
         }
         object IEnumerator.Current
@@ -130,8 +121,7 @@ namespace MyLibrary.Collections.Grafo
         }
 
         private void SetAll(MyLinkedListNode _first, List<MyLinkedListNode> locked, int index)
-        {
-            //correggere problema copia del riferimento (vedi la soluzione scritta dopo)
+        {            
             var copyListMax = CopyFrom(_listMax[index]);            
             int copyIndex = index;
 
@@ -223,7 +213,6 @@ namespace MyLibrary.Collections.Grafo
         {
             return _next[n];
         }
-
         public MyLinkedListNode Previous(int n)
         {
             return _prev[n];
@@ -273,8 +262,3 @@ namespace MyLibrary.Collections.Grafo
     }
 }
 
-//AddAfter(LinkedListNode<T>, T)
-
-//Aggiunge un nuovo nodo che contiene il valore specificato dopo il nodo esistente indicato nell'oggetto LinkedList<T>.
-
-//System_CAPS_pubmethod AddAfter(LinkedListNode<T>, LinkedListNode<T>)
