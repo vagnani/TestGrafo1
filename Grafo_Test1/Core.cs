@@ -80,7 +80,7 @@ namespace MyLibrary.Collections.Grafo
 
                 //if (str[index] == excluded1)                
                 string name = "";
-                for (; index <= str.Count(); index++)
+                for (; index < str.Count(); index++)
                 {                    
                     if (str[index] != excluded1 && str[index] != excluded2 && str[index] != excluded3) //exception
                     {
