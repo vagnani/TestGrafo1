@@ -13,7 +13,7 @@ namespace MyLibrary.Collections.Grafo
             Console.Write("Nodo radice: nome-");
             string n1 = Console.ReadLine();
 
-            Console.WriteLine("Nodo finale/obbiettivo: nome-");
+            Console.Write("Nodo finale/obbiettivo: nome-");
             string nF = Console.ReadLine();
 
             MyLinkedList link =
@@ -21,9 +21,8 @@ namespace MyLibrary.Collections.Grafo
                 new MyLinkedListNode(nF, new Dictionary<string, int>()));
 
             Console.WriteLine("Inserisci nodi grafo con la seguente struttura:");
-            Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");
-            string str = Console.ReadLine();
-            link.AddString(str);
+            Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");            
+            link.AddString(Console.ReadLine());
 
 
             foreach (var list in link)
