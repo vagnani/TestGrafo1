@@ -72,7 +72,7 @@ namespace MyLibrary.Collections.Grafo
                 string toContinue = Console.ReadLine();
                 if(toContinue=="no")
                 {
-                    break;
+                     break;
                 }
 
             } while (true);
