@@ -24,17 +24,59 @@ namespace MyLibrary.Collections.Grafo
             Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");            
             link.AddString(Console.ReadLine());
 
-
-            foreach (var list in link)
+            do
             {
-                string toprint = "";
-                foreach(var node in list)
+                Console.WriteLine("passante per qualche nodo?se si scrivi il nome del nodo, se no scrivi 'no'");
+                string str = Console.ReadLine().Trim();                
+
+                if (str != "no")
                 {
-                    toprint += node.ToString();
+                    List<List<MyLinkedListNode>> nodeFiltered = new List<List<MyLinkedListNode>>();
+
+                    foreach (var list in link)
+                    {
+                        foreach (var element in list)
+                        {
+                            if (element.name == str)
+                            {
+                                nodeFiltered.Add(list); break;
+                            }
+                        }
+                    }
+
+                    foreach (var list in nodeFiltered)
+                    {
+                        string toprint = "";
+                        foreach (var node in list)
+                        {
+                            toprint += node.ToString();
+                        }
+                        Console.WriteLine(toprint);
+                    }
                 }
-                Console.WriteLine(toprint);
-            }
-            
+
+                else
+                {
+                    foreach (var list in link)
+                    {
+                        string toprint = "";
+                        foreach (var node in list)
+                        {
+                            toprint += node.ToString();
+                        }
+                        Console.WriteLine(toprint);
+                    }
+                }
+
+                Console.WriteLine("Vuoi continuare?");
+                string toContinue = Console.ReadLine();
+                if(toContinue=="no")
+                {
+                    break;
+                }
+
+            } while (true);
+
             Console.ReadKey();
         }
     }
