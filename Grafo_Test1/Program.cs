@@ -10,74 +10,58 @@ namespace MyLibrary.Collections.Grafo
     {
         static void Main()
         {
-            Console.Write("Nodo radice: nome-");
-            string n1 = Console.ReadLine();
-
-            Console.Write("Nodo finale/obbiettivo: nome-");
-            string nF = Console.ReadLine();
-
-            MyLinkedList link =
-                new MyLinkedList(new MyLinkedListNode(n1, new Dictionary<string, int>()),
-                new MyLinkedListNode(nF, new Dictionary<string, int>()));
-
             Console.WriteLine("Inserisci nodi grafo con la seguente struttura:");
-            Console.WriteLine("(nodoPadre,nodoFiglio,valoreNumericoIntero)");            
-            link.AddString(Console.ReadLine());
+            Console.WriteLine("(nodo,nodo,valoreNumericoIntero)");
+            string nodi = Console.ReadLine();
+            Console.WriteLine();
+            bool toStop = false;
 
             do
             {
-                Console.WriteLine("passante per qualche nodo?se si scrivi il nome del nodo, se no scrivi 'no'");
-                string str = Console.ReadLine().Trim();                
+                Console.Write("Nodo sorgente: ");
+                string n1 = Console.ReadLine();
 
-                if (str != "no")
+                Console.Write("Nodo finale/obbiettivo: ");
+                string nF = Console.ReadLine();
+
+                MyLinkedList link =
+                    new MyLinkedList(new MyLinkedListNode(n1, new Dictionary<string, int>()),
+                    new MyLinkedListNode(nF, new Dictionary<string, int>()));
+
+                link.AddString(nodi);
+
+                Console.WriteLine();
+                Console.WriteLine("Percorsi possibili:");
+                Console.WriteLine();
+
+                foreach (var list in link)
                 {
-                    List<List<MyLinkedListNode>> nodeFiltered = new List<List<MyLinkedListNode>>();
+                    int valueTot = 0;
+                    string toprint = "";
+                    MyLinkedListNode PrevNode = null;
 
-                    foreach (var list in link)
+                    foreach (var node in list)
                     {
-                        foreach (var element in list)
-                        {
-                            if (element.name == str)
-                            {
-                                nodeFiltered.Add(list); break;
-                            }
-                        }
-                    }
+                        toprint += node.ToString();
 
-                    foreach (var list in nodeFiltered)
-                    {
-                        string toprint = "";
-                        foreach (var node in list)
+                        if (PrevNode != null)
                         {
-                            toprint += node.ToString();
+                            valueTot += PrevNode.value[node.name];
+                            PrevNode = node;
                         }
-                        Console.WriteLine(toprint);
+                        else
+                        { PrevNode = node; }
                     }
+                    
+                    Console.WriteLine($"{toprint} ={valueTot}");
                 }
 
-                else
-                {
-                    foreach (var list in link)
-                    {
-                        string toprint = "";
-                        foreach (var node in list)
-                        {
-                            toprint += node.ToString();
-                        }
-                        Console.WriteLine(toprint);
-                    }
-                }
+                Console.WriteLine();
+                Console.Write("Vuoi continuare, si o no?");
+                if (Console.ReadLine() == "no")
+                { toStop = true; }
 
-                Console.WriteLine("Vuoi continuare?");
-                string toContinue = Console.ReadLine();
-                if(toContinue=="no")
-                {
-                     break;
-                }
-
-            } while (true);
-
-            Console.ReadKey();
+            } while (toStop == false);
         }
     }
 }

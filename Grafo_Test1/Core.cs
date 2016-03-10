@@ -74,6 +74,7 @@ namespace MyLibrary.Collections.Grafo
 
             List<List<string>> all = new List<List<string>>();
 
+            #region da string a oggetto
             for(int index=0; index<str.Count();index++)
             {        
                 List<string> temp = new List<string>();
@@ -102,56 +103,102 @@ namespace MyLibrary.Collections.Grafo
 
                 all.Add(temp);
             }
-            
+            #endregion
+
             List<string> mustContain = new List<string>() { _first.name };
             int countDone = 0;
-            //int indexMust = 0;
-            
-
-            //to see again the function of islock, i mean when i must lock the iterazione
-            for (int indexMust=0;countDone<all.Count;indexMust++)
-            {
+            List<List<string>> listDone = new List<List<string>>();
+                   
+            //viene fermata dalla variabile countDone (variabili fatte)
+            for (int indexMust=0;countDone<all.Count; indexMust++)
+            {                
                 List<List<string>> rightToAdd = new List<List<string>>();                
 
+                /*il metodo funziona per filtri, mi spiego meglio:
+                prende tutti gli elementi che hanno come padre in ordine un elemento di 
+                mustcontain (inizialmente nodo sorgente), aggiunge i nodi figli concatenandoli
+                poi logicamente continua a filtrare la list all affinche mi dia gli elementi a sua volta
+                collegati ai precedenti figli e ripete il processo fino alla fine. Insomma a ogni ripetizione
+                i figli precedenti diventano come dei padri e quindi non 'nonni' sono esclusi.
+                */
                 foreach (var list in all)
-                {
-                    if(list[0]==mustContain[indexMust])
+                {                    
+                    if((list[0]==mustContain[indexMust] || list[1] == mustContain[indexMust]) && listDone.Contains(list)==false)
                     {
                         rightToAdd.Add(list);                        
                     }
                 }
 
+                // una volta trovati tutti i figli di un padre si passa alla loro aggiunta definitiva
                 if (rightToAdd.Count>0)
-                {
+                {                                   
                     foreach (var list in rightToAdd)
                     {
+                        listDone.Add(list);
                         SetAllNodeString();
+                        if (_allNodeString.Contains(list[0])==false)
+                        {
+                            string copy = list[0];
+                            list[0] = list[1];
+                            list[1] = copy;
+                        }
 
-                        //if(_allNodeString.Contains(list[0]))
+                        //il nodo padre deve sempre esistere, per trovare il suo indice passo per una list string
                         int indexFather = _allNodeString.FindIndex(x => x == list[0]);
 
+                        //se esiste gia il figlio passo all'aggiunta direttamente, se no lo creo
                         if (_allNodeString.Contains(list[1]))
                         {
+                            //trovo indice del figlio
                             int indexSon = _allNodeString.FindIndex(x => x == list[1]);
+
+                            //aggiunta definitiva - non simmetrica
                             AddAfter(_allNode[indexFather], _allNode[indexSon]);
                             _allNode[indexFather].value.Add(list[1], Convert.ToInt32(list[2]));
-                            mustContain.Add(list[1]);
+
+                            if (!_allNode[indexFather].Equals(_first) && !_allNode[indexSon].Equals(_goal))
+                            {
+                                //aggiunta definitiva - simmetrica
+                                AddAfter(_allNode[indexSon], _allNode[indexFather]);
+                                _allNode[indexSon].value.Add(list[0], Convert.ToInt32(list[2]));
+                            }
+                            
+                            if (mustContain.Contains(list[1]) == false)
+                            {
+                                //aggiungo il corrente figlio come futuro padre
+                                mustContain.Add(list[1]);
+                            }
+
+                            //indico da escludere questo elemento
                             countDone++;
                         }
                         else
                         {
                             var node = new MyLinkedListNode(list[1], new Dictionary<string, int>());
-                            //check if it is added to _allNode
+
+                            //aggiunta definitiva - non simmetrica
                             AddAfter(_allNode[indexFather], node);
                             _allNode[indexFather].value.Add(list[1], Convert.ToInt32(list[2]));
-                            mustContain.Add(list[1]);
+
+                            if (!_allNode[indexFather].Equals(_first) && !node.Equals(_goal))
+                            {  //aggiunta definitiva - simmetrica
+                                AddAfter(node, _allNode[indexFather]);
+                                node.value.Add(list[0], Convert.ToInt32(list[2]));
+                            }
+
+                            if (mustContain.Contains(list[1]) == false)
+                            {
+                                //aggiungo il corrente figlio come futuro padre
+                                mustContain.Add(list[1]);
+                            }
+
+                            //indico da escludere questo elemento
                             countDone++;
                         }
-                    }
+                    }                    
                 }
             }
         }
-
         private void SetAllNodeString()
         {
             _allNodeString = new List<string>();
@@ -159,8 +206,7 @@ namespace MyLibrary.Collections.Grafo
             {
                 _allNodeString.Add(str.name);
             }
-
-        }
+        }        
     }
 
     public class MyEnumerator: IEnumerator<List<MyLinkedListNode>>
@@ -217,18 +263,18 @@ namespace MyLibrary.Collections.Grafo
                 { _finalList.Add(node); }
             }
         }
-        private void SetAll(MyLinkedListNode _first, List<MyLinkedListNode> locked, int index)
+        private void SetAll(MyLinkedListNode first, List<MyLinkedListNode> locked, int index)
         {            
             var copyListMax = CopyFrom(_listMax[index]);            
             int copyIndex = index;
 
-            foreach(var node in _first._next)
+            foreach (var node in first._next)
             {
                 List<MyLinkedListNode> copyLocked = CopyFrom(locked);
 
-                if (locked.Contains(node,node)==false)
+                if (locked.Contains(node, node) == false)
                 {
-                    if(copyIndex!=index)
+                    if (copyIndex != index)
                     {
                         _listMax.Add(new List<MyLinkedListNode>(copyListMax));
                         copyIndex = _listMax.Count - 1;
@@ -236,7 +282,10 @@ namespace MyLibrary.Collections.Grafo
 
                     _listMax[copyIndex].Add(node);
                     copyLocked.Add(node);
-                    SetAll(node, copyLocked, copyIndex);
+
+                    if (!node.Equals(_last))
+                    { SetAll(node, copyLocked, copyIndex); }
+
                     index++;
                 }
             }
@@ -297,7 +346,7 @@ namespace MyLibrary.Collections.Grafo
         internal List<MyLinkedListNode> _next=new List<MyLinkedListNode>();
         internal List<MyLinkedListNode> _prev=new List<MyLinkedListNode>();        
         internal readonly string name;
-        public Dictionary<string, int> value;
+        internal Dictionary<string, int> value;
 
         public MyLinkedListNode(string name, Dictionary<string, int> value=null)
         {
