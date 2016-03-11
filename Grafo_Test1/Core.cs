@@ -119,11 +119,12 @@ namespace MyLibrary.Collections.Grafo
                 mustcontain (inizialmente nodo sorgente), aggiunge i nodi figli concatenandoli
                 poi logicamente continua a filtrare la list all affinche mi dia gli elementi a sua volta
                 collegati ai precedenti figli e ripete il processo fino alla fine. Insomma a ogni ripetizione
-                i figli precedenti diventano come dei padri e quindi non 'nonni' sono esclusi.
+                i figli precedenti diventano come dei padri e quindi i 'nonni' sono esclusi.
                 */
                 foreach (var list in all)
                 {                    
-                    if((list[0]==mustContain[indexMust] || list[1] == mustContain[indexMust]) && listDone.Contains(list)==false)
+                    if((list[0]==mustContain[indexMust] || list[1] == mustContain[indexMust]) &&
+                        listDone.Contains(list)==false)
                     {
                         rightToAdd.Add(list);                        
                     }
@@ -132,16 +133,34 @@ namespace MyLibrary.Collections.Grafo
                 // una volta trovati tutti i figli di un padre si passa alla loro aggiunta definitiva
                 if (rightToAdd.Count>0)
                 {                                   
-                    foreach (var list in rightToAdd)
+                    foreach (var pseudolist in rightToAdd)
                     {
-                        listDone.Add(list);
+                        listDone.Add(pseudolist);
+                        var list = CopyFrom(pseudolist);
                         SetAllNodeString();
-                        if (_allNodeString.Contains(list[0])==false)
+
+                        if (list[0].Equals(_goal.name) | list[1].Equals(_goal.name))
+                        {
+                            if (list[0].Equals(_goal.name))
+                            {
+                                string copy = list[0];
+                                list[0] = list[1];
+                                list[1] = copy;
+                            }
+
+                            if (_allNodeString.Contains(list[0]) == false)
+                            {
+                                _allNode.Add(new MyLinkedListNode(list[0], new Dictionary<string, int>()));
+                                SetAllNodeString();
+                            }
+                        }
+                        else if (_allNodeString.Contains(list[0])==false)
                         {
                             string copy = list[0];
                             list[0] = list[1];
                             list[1] = copy;
                         }
+                        
 
                         //il nodo padre deve sempre esistere, per trovare il suo indice passo per una list string
                         int indexFather = _allNodeString.FindIndex(x => x == list[0]);
@@ -163,7 +182,7 @@ namespace MyLibrary.Collections.Grafo
                                 _allNode[indexSon].value.Add(list[0], Convert.ToInt32(list[2]));
                             }
                             
-                            if (mustContain.Contains(list[1]) == false)
+                            if (mustContain.Contains(list[1]) == false && list[1].Equals(_goal.name)==false)
                             {
                                 //aggiungo il corrente figlio come futuro padre
                                 mustContain.Add(list[1]);
@@ -198,6 +217,15 @@ namespace MyLibrary.Collections.Grafo
                     }                    
                 }
             }
+        }
+        private T CopyFrom<T>(T list) where T : class, IEnumerable, ICollection, IList, new()
+        {
+            T result = new T();
+            foreach (var n in list)
+            {
+                result.Add(n);
+            }
+            return result;
         }
         private void SetAllNodeString()
         {
@@ -254,39 +282,35 @@ namespace MyLibrary.Collections.Grafo
             }
             return false;
         }
-
-        private void CheckRightList()
-        {
-            foreach(var node in _listMax)
-            {
-                if (node[node.Count - 1].Equals(_last))
-                { _finalList.Add(node); }
-            }
-        }
+        
         private void SetAll(MyLinkedListNode first, List<MyLinkedListNode> locked, int index)
         {            
             var copyListMax = CopyFrom(_listMax[index]);            
             int copyIndex = index;
 
-            foreach (var node in first._next)
+            if (first.Equals(_last)==false)
             {
-                List<MyLinkedListNode> copyLocked = CopyFrom(locked);
-
-                if (locked.Contains(node, node) == false)
-                {
-                    if (copyIndex != index)
+                foreach (var node in first._next)
+                {                    
+                    if (locked.Contains(node, node) == false)
                     {
-                        _listMax.Add(new List<MyLinkedListNode>(copyListMax));
-                        copyIndex = _listMax.Count - 1;
+                        List<MyLinkedListNode> copyLocked = CopyFrom(locked);
+                        if (copyIndex != index)
+                        {
+                            _listMax.Add(new List<MyLinkedListNode>(copyListMax));
+                            copyIndex = _listMax.Count - 1;
+                        }
+
+                        _listMax[copyIndex].Add(node);                        
+
+                        if (!node.Equals(_last))
+                        {
+                            copyLocked.Add(node);
+                            SetAll(node, copyLocked, copyIndex);
+                        }
+
+                        index=-1;
                     }
-
-                    _listMax[copyIndex].Add(node);
-                    copyLocked.Add(node);
-
-                    if (!node.Equals(_last))
-                    { SetAll(node, copyLocked, copyIndex); }
-
-                    index++;
                 }
             }
         }
@@ -298,6 +322,14 @@ namespace MyLibrary.Collections.Grafo
                 result.Add(n);
             }
             return result;
+        }
+        private void CheckRightList()
+        {
+            foreach (var node in _listMax)
+            {
+                if (node[node.Count - 1].Equals(_last))
+                { _finalList.Add(node); }
+            }
         }
 
         public void Reset()
@@ -344,7 +376,7 @@ namespace MyLibrary.Collections.Grafo
     public class MyLinkedListNode:IEqualityComparer<MyLinkedListNode>
     {
         internal List<MyLinkedListNode> _next=new List<MyLinkedListNode>();
-        internal List<MyLinkedListNode> _prev=new List<MyLinkedListNode>();        
+              
         internal readonly string name;
         internal Dictionary<string, int> value;
 
@@ -357,11 +389,7 @@ namespace MyLibrary.Collections.Grafo
         public MyLinkedListNode Next(int n)
         {
             return _next[n];
-        }
-        public MyLinkedListNode Previous(int n)
-        {
-            return _prev[n];
-        }
+        }        
 
         public override bool Equals(object obj)
         {
@@ -396,14 +424,7 @@ namespace MyLibrary.Collections.Grafo
             {
                 return _next.Count;
             }
-        }
-        public int PreviousCount
-        {
-            get
-            {
-                return _prev.Count;
-            }
-        }
+        }        
     }
 }
 

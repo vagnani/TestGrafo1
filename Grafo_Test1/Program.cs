@@ -19,10 +19,10 @@ namespace MyLibrary.Collections.Grafo
             do
             {
                 Console.Write("Nodo sorgente: ");
-                string n1 = Console.ReadLine();
+                string n1 = Console.ReadLine().Trim();
 
                 Console.Write("Nodo finale/obbiettivo: ");
-                string nF = Console.ReadLine();
+                string nF = Console.ReadLine().Trim();
 
                 MyLinkedList link =
                     new MyLinkedList(new MyLinkedListNode(n1, new Dictionary<string, int>()),
@@ -57,7 +57,7 @@ namespace MyLibrary.Collections.Grafo
                 }
 
                 Console.WriteLine();
-                Console.Write("Vuoi continuare, si o no?");
+                Console.Write("Vuoi continuare, si o no? ");
                 if (Console.ReadLine() == "no")
                 { toStop = true; }
 
