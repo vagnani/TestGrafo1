@@ -7,9 +7,12 @@ namespace MyLibrary.Collections.Grafo
 {
     public class MyLinkedList : IEnumerable<List<MyLinkedListNode>>
     {
+        //nodo sorgente
         internal MyLinkedListNode _first;
-        internal MyLinkedListNode _goal;
+        //nodo arrivo
+        internal MyLinkedListNode _goal;        
         internal List<MyLinkedListNode> _allNode;
+        //rappresentazione sotto forma di string della variabile sopra al fine di trovare l'indice di oggetti già esistenti
         internal List<string> _allNodeString;
 
         public MyLinkedList(MyLinkedListNode first, MyLinkedListNode last)
@@ -20,6 +23,7 @@ namespace MyLibrary.Collections.Grafo
             _allNode.Add(first);_allNode.Add(last);
         }
         
+        //proprietà : inutili
         public MyLinkedListNode First
         {
             get
@@ -44,6 +48,7 @@ namespace MyLibrary.Collections.Grafo
             return GetEnumerator();
         }
 
+        //metodi che si occupano di aggiungere i nodi in base alle situazioni
         public void AddAfter(MyLinkedListNode node, MyLinkedListNode newNode)
         {
             var found = _allNode.FindIndex(x => x.Equals(node));
@@ -68,33 +73,31 @@ namespace MyLibrary.Collections.Grafo
         {
             str.Trim();            
 
-            char excluded1 = '(';
-            char excluded2 = ')';
-            char excluded3 = ',';
+            char excluded1 = '|';
+            char excluded2 = ',';           
 
             List<List<string>> all = new List<List<string>>();
 
             #region da string a oggetto
-            for(int index=0; index<str.Count();index++)
-            {        
+            for (int index = 0; index < str.Count(); index++)
+            {
                 List<string> temp = new List<string>();
-
-                //if (str[index] == excluded1)                
+                         
                 string name = "";
                 for (; index < str.Count(); index++)
-                {                    
-                    if (str[index] != excluded1 && str[index] != excluded2 && str[index] != excluded3) //exception
+                {
+                    if (str[index] != excluded1 && str[index] != excluded2) 
                     {
                         name += str[index];
                     }
 
-                    if (str[index] == excluded3)
+                    if (str[index] == excluded2)
                     {
                         temp.Add(name);
                         name = "";
-                    }                    
+                    }
 
-                    if (str[index] == excluded2)
+                    if (str[index] == excluded1)
                     {
                         temp.Add(name);
                         break;
@@ -105,21 +108,20 @@ namespace MyLibrary.Collections.Grafo
             }
             #endregion
 
+            #region Core di aggiunta
             List<string> mustContain = new List<string>() { _first.name };
             int countDone = 0;
             List<List<string>> listDone = new List<List<string>>();
                    
-            //viene fermata dalla variabile countDone (variabili fatte)
+            //viene fermata dalla variabile countDone (oggetti aggiunti/fatti)
             for (int indexMust=0;countDone<all.Count; indexMust++)
             {                
-                List<List<string>> rightToAdd = new List<List<string>>();                
+                List<List<string>> rightToAdd = new List<List<string>>();
 
                 /*il metodo funziona per filtri, mi spiego meglio:
-                prende tutti gli elementi che hanno come padre in ordine un elemento di 
-                mustcontain (inizialmente nodo sorgente), aggiunge i nodi figli concatenandoli
-                poi logicamente continua a filtrare la list all affinche mi dia gli elementi a sua volta
-                collegati ai precedenti figli e ripete il processo fino alla fine. Insomma a ogni ripetizione
-                i figli precedenti diventano come dei padri e quindi i 'nonni' sono esclusi.
+                prende tutti gli elementi che hanno come padre un elemento contenuto in 
+                mustcontain , aggiunge i nodi figli concatenandoli (cioèè collegando i riferimenti
+                poi logicamente continua e i figli precedenti diventano come dei padri e si ripete il procedimento.
                 */
                 foreach (var list in all)
                 {                    
@@ -132,15 +134,20 @@ namespace MyLibrary.Collections.Grafo
 
                 // una volta trovati tutti i figli di un padre si passa alla loro aggiunta definitiva
                 if (rightToAdd.Count>0)
-                {                                   
+                {                           
+                    //tutto quello che faccio dopo si basa sul concetto che esista gia il nodo padre e di conseguenza diventa una catena poiche 
+                    //il figlio che dopo viene aggiunto diventerà in seguito padre         
                     foreach (var pseudolist in rightToAdd)
                     {
+                        //copiato per paura di possibli problemi quando verifico le uguaglianze
                         listDone.Add(pseudolist);
                         var list = CopyFrom(pseudolist);
                         SetAllNodeString();
 
+                        //caso eccezzionale: un dei due nodi è quello finale quindi esso non puo avere nodi in avanti collegati pechè con lui finisce il percorso
                         if (list[0].Equals(_goal.name) | list[1].Equals(_goal.name))
                         {
+                            //se il primo elemento è quello finale lo scambio: mi sara utile dopo
                             if (list[0].Equals(_goal.name))
                             {
                                 string copy = list[0];
@@ -148,12 +155,14 @@ namespace MyLibrary.Collections.Grafo
                                 list[1] = copy;
                             }
 
+                            //vedo se gia esiste un oggetto se no lo creo io
                             if (_allNodeString.Contains(list[0]) == false)
                             {
                                 _allNode.Add(new MyLinkedListNode(list[0], new Dictionary<string, int>()));
                                 SetAllNodeString();
                             }
                         }
+                        //caso eccezzionale: il padre (di mustContain) non è il primo elemento della lista allora li scambio
                         else if (_allNodeString.Contains(list[0])==false)
                         {
                             string copy = list[0];
@@ -217,6 +226,7 @@ namespace MyLibrary.Collections.Grafo
                     }                    
                 }
             }
+            #endregion
         }
         private T CopyFrom<T>(T list) where T : class, IEnumerable, ICollection, IList, new()
         {
@@ -239,11 +249,15 @@ namespace MyLibrary.Collections.Grafo
 
     public class MyEnumerator: IEnumerator<List<MyLinkedListNode>>
     {
+        //nodo sorgente
         private MyLinkedListNode _first;
+        //nodo arrivo
         private MyLinkedListNode _last;
         private int _index=-1;
 
+        //lista che conterrà tutti i possibli percorsi
         private List<List<MyLinkedListNode>> _listMax=new List<List<MyLinkedListNode>>();
+        //lista che conterrà i percorsi filtrati: ossia il cui ultimo nodo è uguale all'oggetto _last
         private List<List<MyLinkedListNode>> _finalList=new List<List<MyLinkedListNode>>();
 
         public List<MyLinkedListNode> Current
@@ -268,6 +282,7 @@ namespace MyLibrary.Collections.Grafo
             this._first = mylink._first;
             _last = mylink._goal;
 
+            //do avvio alla ricorsione dandogli il nodo sorgente
             _listMax.Add(new List<MyLinkedListNode>() { _first });
             SetAll(_first, new List<MyLinkedListNode>() { _first }, _listMax.Count - 1);
             CheckRightList();
@@ -283,6 +298,8 @@ namespace MyLibrary.Collections.Grafo
             return false;
         }
         
+        //metod che sfrutta ricorsione
+        //locked contiene i nodi gia fatti/passati
         private void SetAll(MyLinkedListNode first, List<MyLinkedListNode> locked, int index)
         {            
             var copyListMax = CopyFrom(_listMax[index]);            
@@ -290,11 +307,13 @@ namespace MyLibrary.Collections.Grafo
 
             if (first.Equals(_last)==false)
             {
+                //scorre tutti gli elementi collegati avanti al nodo first
                 foreach (var node in first._next)
                 {                    
                     if (locked.Contains(node, node) == false)
                     {
                         List<MyLinkedListNode> copyLocked = CopyFrom(locked);
+                        //al fine di continuare la lista data ad inizio invocazione del metodo
                         if (copyIndex != index)
                         {
                             _listMax.Add(new List<MyLinkedListNode>(copyListMax));
@@ -303,6 +322,7 @@ namespace MyLibrary.Collections.Grafo
 
                         _listMax[copyIndex].Add(node);                        
 
+                        //ovviamente se il nodo corrente è quello di arrivo fermo il corrente percorso e trovo gli altri
                         if (!node.Equals(_last))
                         {
                             copyLocked.Add(node);
@@ -314,6 +334,7 @@ namespace MyLibrary.Collections.Grafo
                 }
             }
         }
+        //metodi di utilità
         private T CopyFrom<T>(T list) where T : class, IEnumerable, ICollection, IList, new()
         {
             T result = new T();
@@ -323,6 +344,7 @@ namespace MyLibrary.Collections.Grafo
             }
             return result;
         }
+        //metodo che controlla pecorsi giusti
         private void CheckRightList()
         {
             foreach (var node in _listMax)
@@ -375,8 +397,7 @@ namespace MyLibrary.Collections.Grafo
     
     public class MyLinkedListNode:IEqualityComparer<MyLinkedListNode>
     {
-        internal List<MyLinkedListNode> _next=new List<MyLinkedListNode>();
-              
+        internal List<MyLinkedListNode> _next=new List<MyLinkedListNode>();              
         internal readonly string name;
         internal Dictionary<string, int> value;
 
@@ -401,7 +422,7 @@ namespace MyLibrary.Collections.Grafo
         }
         public override string ToString()
         {
-            return $"({name})";
+            return $"{name}";
         }
 
         #region interface

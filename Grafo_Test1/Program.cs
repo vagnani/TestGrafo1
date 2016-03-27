@@ -7,14 +7,23 @@ using System.Threading.Tasks;
 namespace MyLibrary.Collections.Grafo
 {
     class Program
-    {
+    {        
         static void Main()
         {
-            Console.WriteLine("Inserisci nodi grafo con la seguente struttura:");
-            Console.WriteLine("(nodo,nodo,valoreNumericoIntero)");
-            string nodi = Console.ReadLine();
-            Console.WriteLine();
-            bool toStop = false;
+            string nodi="";
+            Console.WriteLine("Problema del grafo: con nodi simmetrici");
+            Console.WriteLine("Inserisci archi cosi: nodo,nodo,valore <--virgole obbligatorie e non scrivere la 'n' per i nodi");
+
+            do
+            {
+                Console.Write("Inserisci arco (! =ferma aggiunta) --> ");                
+                string arco = Console.ReadLine();
+                if (arco[0] != '!')
+                    nodi += arco.Trim()+"|";
+                else
+                    break;
+                
+            } while (true);
 
             do
             {
@@ -34,15 +43,17 @@ namespace MyLibrary.Collections.Grafo
                 Console.WriteLine("Percorsi possibili:");
                 Console.WriteLine();
 
+                List<Tuple<List<string>, int>> sorted = new List<Tuple<List<string>, int>>();
                 foreach (var list in link)
                 {
-                    int valueTot = 0;
-                    string toprint = "";
+                    int valueTot = 0;                    
+                    List<string> temp = new List<string>();
+                    //conservo il nodo precedente al fine di prendere il valore/distanza che collega i due 
                     MyLinkedListNode PrevNode = null;
 
                     foreach (var node in list)
                     {
-                        toprint += node.ToString();
+                        temp.Add(node.ToString());
 
                         if (PrevNode != null)
                         {
@@ -52,16 +63,31 @@ namespace MyLibrary.Collections.Grafo
                         else
                         { PrevNode = node; }
                     }
-                    
-                    Console.WriteLine($"{toprint} ={valueTot}");
+
+                    sorted.Add(new Tuple<List<string>, int>(temp, valueTot));
+                }
+
+                sorted.Sort((x, y) => x.Item2.CompareTo(y.Item2));
+                foreach (var tupla in sorted)
+                {
+                    string toprint = "";
+                    for (int i=0;i<tupla.Item1.Count;i++)
+                    {
+                        if (i == tupla.Item1.Count - 1)
+                            toprint += "n" + tupla.Item1[i];
+                        else
+                            toprint += "n" + tupla.Item1[i] + ",";
+                    }
+
+                    Console.WriteLine($"{toprint} ={tupla.Item2}");
                 }
 
                 Console.WriteLine();
                 Console.Write("Vuoi continuare, si o no? ");
                 if (Console.ReadLine() == "no")
-                { toStop = true; }
+                    break;                
 
-            } while (toStop == false);
-        }
+            } while (true);
+        }        
     }
 }
